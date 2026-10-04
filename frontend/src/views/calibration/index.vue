@@ -3,7 +3,7 @@
     <header class="page-head">
       <div>
         <h2>仪器检定管理</h2>
-        <p class="page-desc">维护仪器检定记录，围绕记录编号、仪器编号、仪器名称、检定单位做登记、筛选与状态流转。</p>
+        <p class="page-desc">维护仪器检定记录，围绕记录编号、仪器编号、仪器名称、检定单位做登记、筛选与状态流转；测报方案批准后，在办检定待办会在此一并挂出复核事项。</p>
       </div>
       <div class="page-actions">
         <button class="btn primary" type="button" @click="openCreate">登记仪器检定记录</button>
@@ -14,7 +14,7 @@
     <div class="stat-row">
       <article v-for="item in stats" :key="item.label" class="stat-card">
         <span class="stat-label">{{ item.label }}</span>
-        <strong class="stat-value">{{ item.value }}</strong>
+        <strong class="stat-value" :class="{ 'stat-alert': item.alert }">{{ item.value }}</strong>
       </article>
     </div>
 
@@ -37,6 +37,7 @@
       <thead>
         <tr>
           <th v-for="column in columns" :key="column">{{ column }}</th>
+          <th>方案批准后复核事项</th>
           <th>当前状态</th>
           <th>可执行动作</th>
         </tr>
@@ -44,6 +45,10 @@
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)">
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td class="review-cell">
+            <span v-if="row['复核事项']" class="review-note">{{ row['复核事项'] }}</span>
+            <span v-else class="hint-text">无</span>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -58,7 +63,7 @@
           </td>
         </tr>
         <tr v-if="!rows.length">
-          <td :colspan="columns.length + 2" class="empty-state">暂无仪器检定数据，可先登记仪器检定记录</td>
+          <td :colspan="columns.length + 3" class="empty-state">暂无仪器检定数据，可先登记仪器检定记录</td>
         </tr>
       </tbody>
     </table>
@@ -85,7 +90,6 @@ const meta = moduleMeta('calibration')
 const columns = ["记录编号", "仪器编号", "仪器名称", "检定单位", "检定日期", "有效期至", "检定结论", "检定状态"]
 const actions = ["送出检定", "确认合格", "标记不合格"]
 const statuses = ["待送检", "送检中", "已合格", "不合格", "已停用"]
-const stats = [{"label": "待送检仪器", "value": 0}, {"label": "已合格仪器", "value": 0}, {"label": "不合格仪器", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -98,6 +102,15 @@ const statusSummary = computed(() =>
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
 )
+// 统计实时计算：含复核事项的待办数由测报方案批准联动写入。
+const stats = computed(() => {
+  const reviewPending = rows.value.filter((row) => String(row['复核事项'] ?? '') !== '').length
+  return [
+    { label: "待送检仪器", value: rows.value.filter((row) => String(row.status) === '待送检').length, alert: false },
+    { label: "已合格仪器", value: rows.value.filter((row) => String(row.status) === '已合格').length, alert: false },
+    { label: "方案复核待办", value: reviewPending, alert: reviewPending > 0 },
+  ]
+})
 
 function resetFilters() {
   filters.value = {}
