@@ -16,7 +16,39 @@
         <span class="stat-label">{{ item.label }}</span>
         <strong class="stat-value">{{ item.value }}</strong>
       </article>
+      <article class="stat-card stat-accent">
+        <span class="stat-label">方案批准联动复核事项</span>
+        <strong class="stat-value">{{ pendingReviewCount }}</strong>
+      </article>
     </div>
+
+    <div v-if="pendingReviews.length" class="review-panel">
+      <h3 class="block-title">测报方案批准联动 · 待复核事项</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>检定待办</th>
+            <th>来源方案</th>
+            <th>复核内容</th>
+            <th>生成时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="review in pendingReviews" :key="review.id">
+            <td>{{ review.entryLabel }}</td>
+            <td>{{ review.planCode }} {{ review.planName }}</td>
+            <td>{{ review.content }}</td>
+            <td>{{ review.createdAt }}</td>
+            <td>
+              <button class="link" type="button" @click="finishReview(review.id)">完成复核</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p v-if="reviewMessage" :class="['notice', reviewOk ? 'ok' : 'bad']">{{ reviewMessage }}</p>
 
     <p class="status-legend">
       <span v-for="item in statusSummary" :key="item.status" class="legend-item">
@@ -79,6 +111,7 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { usePlanExchangeStore } from '@/stores/plan-exchange'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('calibration')
@@ -87,17 +120,31 @@ const actions = ["送出检定", "确认合格", "标记不合格"]
 const statuses = ["待送检", "送检中", "已合格", "不合格", "已停用"]
 const stats = [{"label": "待送检仪器", "value": 0}, {"label": "已合格仪器", "value": 0}, {"label": "不合格仪器", "value": 0}]
 
+const planExchange = usePlanExchangeStore()
+
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
+const reviewMessage = ref('')
+const reviewOk = ref(true)
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+
+const pendingReviews = computed(() => planExchange.reviews.filter((review) => !review.done))
+const pendingReviewCount = computed(() => pendingReviews.value.length)
+
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
 )
+
+function finishReview(id: number) {
+  const result = planExchange.finishReview(id)
+  reviewMessage.value = result.message
+  reviewOk.value = result.ok
+}
 
 function resetFilters() {
   filters.value = {}
@@ -114,6 +161,7 @@ function openCreate() {
 
 function runAction(action: string, row: EntryRow) {
   errorMessage.value = ''
+  reviewMessage.value = ''
   const result = applyAction(meta.key, Number(row.id), action)
   if (!result.ok) {
     errorMessage.value = result.message
@@ -124,6 +172,7 @@ function runAction(action: string, row: EntryRow) {
 
 function reload() {
   errorMessage.value = ''
+  planExchange.refresh()
   try {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items

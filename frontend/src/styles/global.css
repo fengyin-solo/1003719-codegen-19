@@ -35,3 +35,37 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+
+/* 方案台账 / 档案交换台 */
+.tab-bar { display: flex; gap: 8px; margin: 8px 0 14px; border-bottom: 1px solid var(--border); }
+.tab { border: none; background: none; padding: 8px 16px; font-size: 14px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+.tab:disabled { opacity: .6; cursor: not-allowed; }
+.tab-badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 999px; background: #f04438; color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
+.block-title { display: flex; align-items: center; gap: 10px; font-size: 14px; margin: 18px 0 8px; }
+.exchange-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.upload-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.upload-btn { display: inline-flex; align-items: center; }
+.hint { font-size: 12px; color: var(--muted); margin: 8px 0; }
+.notice { border-radius: 6px; padding: 8px 12px; font-size: 13px; margin: 8px 0; }
+.notice.ok { background: #ecfdf3; color: #027a48; border: 1px solid #abefc6; }
+.notice.bad { background: #fef3f2; color: #b42318; border: 1px solid #fecdca; }
+.detail-list { margin: 0 0 12px; padding-left: 18px; font-size: 12px; color: var(--muted); max-height: 140px; overflow: auto; }
+.detail-list li { margin: 2px 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.badge { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: 11px; white-space: nowrap; }
+.badge-green { background: #ecfdf3; color: #027a48; }
+.badge-gray { background: #f2f4f7; color: #475467; }
+.badge-orange { background: #fffaeb; color: #b54708; }
+.badge-blue { background: #eff8ff; color: #175cd3; }
+.cell-note { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.text-bad { color: #b42318; }
+.stat-accent { border-color: #b2ccff; background: #f5f8ff; }
+.version-filter { margin-left: auto; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+.review-panel { background: #fff; border: 1px solid #b2ccff; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+.review-panel .block-title { margin-top: 0; }
+.log-list { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
+.log-list li { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
+.log-time { color: #94a3b8; min-width: 140px; }
+.link.danger { color: #b42318; }
+.link:disabled { color: #94a3b8; cursor: not-allowed; }

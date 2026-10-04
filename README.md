@@ -69,3 +69,27 @@ npm run build
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
 - 想回到初始数据：清掉浏览器里 `hydrology-monitor-station:entries` 这一项，或调用 `resetModule(模块)`。
+
+## 测报方案 · 档案交换台
+
+测报方案页（`views/plan/`）分「方案台账」「档案交换台」两个标签页，交换台逻辑在
+`frontend/src/data/plan-exchange/`，状态持久化在 `localStorage` 的
+`hydrology-monitor-station:plan-exchange` 键下：
+
+- **上传附件清单**：CSV 必须包含方案编号、方案名称、适用范围、监测项目、测次安排；缺列整体退回，
+  单行缺字段只让该行进失败清单、其余行继续导入，失败行可下载修正后重传，从失败处继续；
+  同内容重复导入只形成一个版本。
+- **版本规则**：在线版本与附件冲突时以最新「批准留档」版本为准，冲突附件不采用、不覆盖在册方案；
+  废止方案的全部版本冻结为只读，按原日期兼容，附件只留痕不改数据。
+- **下载待审批方案包**：待审批方案主表 + 附件清单两份 CSV，均含适用范围、监测项目、测次安排。
+- **批准联动**：批准后给仪器检定入口的「待送检」待办逐条新增复核事项（幂等，不重复生成）；
+  批准带在途锁与状态二次校验，并发提交只生效一次。
+- 标签页、版本筛选等界面状态由 `stores/plan-exchange.ts` 保留，路由返回后方案版本仍在。
+
+业务规则的离线验证脚本（不依赖浏览器）：
+
+```bash
+cd frontend
+node scripts/verify-plan-exchange.cjs
+```
+
